@@ -142,13 +142,16 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void pieceSelected(int row, int col) {
+    print('BAstı');
     setState(() {
       if (board[row][col] != null) {
         selectedPiece = board[row][col];
         selectedRow = row;
         selectedCol = col;
+      } else if (selectedPiece != null &&
+          validMoves.any((element) => element[0] == row && element[1] == col)) {
+        movePiece(row, col);
       }
-
       //seçildikten sonra geçerli hamlelerin hesaplanması
       validMoves = calculateRawValidMoves(
         selectedRow,
@@ -160,6 +163,10 @@ class _GameBoardState extends State<GameBoard> {
 
   List<List<int>> calculateRawValidMoves(int row, int col, ChessPiece? piece) {
     List<List<int>> candidateMoves = [];
+
+    if (piece == null) {
+      return [];
+    }
 
     int direction = piece!.isWhite ? -1 : 1;
 
@@ -339,6 +346,18 @@ class _GameBoardState extends State<GameBoard> {
     }
 
     return candidateMoves;
+  }
+
+  void movePiece(int newRow, int newCol) {
+    board[newRow][newCol] = selectedPiece;
+    board[selectedRow][selectedCol] = null;
+
+    setState(() {
+      selectedPiece = null;
+      selectedRow = -1;
+      selectedCol = -1;
+      validMoves = [];
+    });
   }
 
   @override

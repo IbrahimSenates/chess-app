@@ -33,6 +33,7 @@ class Square extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        margin: EdgeInsets.all(isValidMove ? 8 : 0),
         color: squareColor,
         child: piece != null ? Image.asset(piece!.imagePath) : null,
       ),
