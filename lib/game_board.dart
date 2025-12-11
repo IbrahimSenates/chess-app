@@ -194,16 +194,97 @@ class _GameBoardState extends State<GameBoard> {
           candidateMoves.add([row + direction, col + 1]);
         }
         break;
+
       case ChessPieceType.rook:
+        var directions = [
+          [-1, 0], //yukarı
+          [1, 0], //aşağı
+          [0, -1], //sol
+          [0, 1], //sağ
+        ];
+        for (var direction in directions) {
+          var i = 1;
+          while (true) {
+            var newRow = row + i * direction[0];
+            var newCol = col + i * direction[1];
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+            if (board[newRow][newCol] != null) {
+              if (board[newRow][newCol]!.isWhite != piece.isWhite) {
+                candidateMoves.add([newRow, newCol]);
+              }
+              break;
+            }
+            candidateMoves.add([newRow, newCol]);
+            i++;
+          }
+        }
         break;
+
       case ChessPieceType.knight:
+        var knightMoves = [
+          [-2, -1], //2 yukarı 1 sol
+          [-2, 1], //2 yukarı 1 sağ
+          [2, -1], //2 aşağı 1 sol
+          [2, 1], //2 aşağı 1 sağ
+          [-1, -2], //1 yukarı 2 sol
+          [-1, 2], //1 yukarı 2 sağ
+          [1, -2], // 1 aşağı 2 sol
+          [1, 2], //1 aşağı 2 sağ
+        ];
+        for (var direction in knightMoves) {
+          var newRow = row + direction[0];
+          var newCol = col + direction[1];
+
+          if (!isInBoard(newRow, newCol)) {
+            continue;
+          }
+          if (board[newRow][newCol] != null) {
+            if (board[newRow][newCol]!.isWhite != piece.isWhite) {
+              candidateMoves.add([newRow, newCol]);
+            }
+            continue;
+          }
+          candidateMoves.add([newRow, newCol]);
+        }
         break;
+
       case ChessPieceType.bishop:
+        var bishopMoves = [
+          [-1, -1], //sol yukarı çapraz
+          [-1, 1], // sağ yukarı çapraz
+          [1, -1], //sol aşağı çapraz
+          [1, 1], //sağ aşağı çapraz
+        ];
+        for (var direction in bishopMoves) {
+          var i = 0;
+          while (true) {
+            var newRow = row + i * direction[0];
+            var newCol = col + i * direction[1];
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+            if (board[newRow][newCol] != null) {
+              if (board[newRow][newCol]!.isWhite != piece.isWhite) {
+                candidateMoves.add([newRow, newCol]);
+              }
+              break;
+            }
+            candidateMoves.add([newRow, newCol]);
+
+            i++;
+          }
+        }
+
         break;
+
       case ChessPieceType.queen:
         break;
+
       case ChessPieceType.king:
         break;
+
       default:
     }
 
