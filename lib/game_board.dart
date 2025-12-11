@@ -184,13 +184,13 @@ class _GameBoardState extends State<GameBoard> {
         //sol çapraz
         if (isInBoard(row + direction, col - 1) &&
             board[row + direction][col - 1] != null &&
-            board[row + direction][col - 1]!.isWhite) {
+            board[row + direction][col - 1]!.isWhite != piece.isWhite) {
           candidateMoves.add([row + direction, col - 1]);
         }
         //sağ çapraz
         if (isInBoard(row + direction, col + 1) &&
             board[row + direction][col + 1] != null &&
-            board[row + direction][col + 1]!.isWhite) {
+            board[row + direction][col + 1]!.isWhite != piece.isWhite) {
           candidateMoves.add([row + direction, col + 1]);
         }
         break;
@@ -258,7 +258,7 @@ class _GameBoardState extends State<GameBoard> {
           [1, 1], //sağ aşağı çapraz
         ];
         for (var direction in bishopMoves) {
-          var i = 0;
+          var i = 1;
           while (true) {
             var newRow = row + i * direction[0];
             var newCol = col + i * direction[1];
@@ -272,18 +272,68 @@ class _GameBoardState extends State<GameBoard> {
               break;
             }
             candidateMoves.add([newRow, newCol]);
-
             i++;
           }
         }
-
         break;
 
       case ChessPieceType.queen:
+        var queenMoves = [
+          [-1, 0], //yukarı hareket
+          [1, 0], // aşağı hareket
+          [0, -1], //sola hareket
+          [0, 1], //sağa hareket
+          [-1, -1], //sol yukarı çapraz
+          [-1, 1], //sağ yukarı çapraz
+          [1, -1], //sol aşağı çapraz
+          [1, 1], //sağ aşağı çapraz
+        ];
+        for (var direction in queenMoves) {
+          var i = 1;
+
+          while (true) {
+            var newRow = row + i * direction[0];
+            var newCol = col + i * direction[1];
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+            if (board[newRow][newCol] != null) {
+              if (board[newRow][newCol]!.isWhite != piece.isWhite) {
+                candidateMoves.add([newRow, newCol]);
+              }
+              break;
+            }
+            candidateMoves.add([newRow, newCol]);
+            i++;
+          }
+        }
         break;
 
       case ChessPieceType.king:
-        break;
+        var kingMoves = [
+          [-1, 0], //yukarı
+          [1, 0], //aşağı
+          [0, -1], //sol
+          [0, 1], //sağ
+          [-1, -1], //sol yukarı çapraz
+          [-1, 1], //sağ yukarı çapraz
+          [1, -1], //aşağı sol çapraz
+          [1, 1], //aşağı sağ çapraz
+        ];
+        for (var direction in kingMoves) {
+          var newRow = row + direction[0];
+          var newCol = col + direction[1];
+          if (!isInBoard(newRow, newCol)) {
+            continue;
+          }
+          if (board[newRow][newCol] != null) {
+            if (board[newRow][newCol]!.isWhite != piece.isWhite) {
+              candidateMoves.add([newRow, newCol]);
+            }
+            continue;
+          }
+          candidateMoves.add([newRow, newCol]);
+        }
 
       default:
     }
