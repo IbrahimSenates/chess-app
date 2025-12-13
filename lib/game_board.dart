@@ -1,3 +1,4 @@
+import 'package:chess/components/dead_piece.dart';
 import 'package:chess/components/piece.dart';
 import 'package:chess/components/square.dart';
 import 'package:chess/helper/helper_methods.dart';
@@ -22,6 +23,12 @@ class _GameBoardState extends State<GameBoard> {
 
   //seçili taş için hamle
   List<List<int>> validMoves = [];
+
+  //Alınan beyaz taşlar
+  List<ChessPiece> whitePiecesTaken = [];
+
+  //Alınan siyah taşlar
+  List<ChessPiece> blackPiecesTaken = [];
 
   @override
   void initState() {
@@ -142,9 +149,13 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void pieceSelected(int row, int col) {
-    print('BAstı');
     setState(() {
-      if (board[row][col] != null) {
+      if (selectedPiece == null && board[row][col] != null) {
+        selectedPiece = board[row][col];
+        selectedRow = row;
+        selectedCol = col;
+      } else if (board[row][col] != null &&
+          board[row][col]!.isWhite == selectedPiece!.isWhite) {
         selectedPiece = board[row][col];
         selectedRow = row;
         selectedCol = col;
@@ -349,6 +360,16 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void movePiece(int newRow, int newCol) {
+    //hareket edilen yerde taş varsa eğer
+    if (board[newRow][newCol] != null) {
+      var capturedPieces = board[newRow][newCol];
+      if (capturedPieces!.isWhite) {
+        whitePiecesTaken.add(capturedPieces);
+      } else {
+        blackPiecesTaken.add(capturedPieces);
+      }
+    }
+
     board[newRow][newCol] = selectedPiece;
     board[selectedRow][selectedCol] = null;
 
@@ -364,35 +385,67 @@ class _GameBoardState extends State<GameBoard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: GridView.builder(
-        itemCount: 8 * 8,
-        physics: NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 8,
-        ),
-        itemBuilder: (context, index) {
-          int row = index ~/ 8;
-          int col = index % 8;
+      body: Column(
+        children: [
+          //alınan beyaz taşların alanı
+          Expanded(
+            child: GridView.builder(
+              itemCount: whitePiecesTaken.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+              ),
+              itemBuilder: (context, index) =>
+                  DeadPiece(imagePath: whitePiecesTaken[index].imagePath),
+            ),
+          ),
 
-          bool isSelected = selectedRow == row && selectedCol == col;
+          //Tahta alanı
+          Expanded(
+            flex: 3,
+            child: GridView.builder(
+              itemCount: 8 * 8,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+              ),
+              itemBuilder: (context, index) {
+                int row = index ~/ 8;
+                int col = index % 8;
 
-          //geçerli bir hareket olup olmadığını kontrol edelim
-          bool isValidMove = false;
-          for (var position in validMoves) {
-            //örn (2,0) ve (3,0) validMoves içine eklenmiş olsun, position[0]=row position[1]=col oluyor
-            if (position[0] == row && position[1] == col) {
-              isValidMove = true;
-            }
-          }
+                bool isSelected = selectedRow == row && selectedCol == col;
 
-          return Square(
-            isWhite: isWhite(index),
-            piece: board[row][col],
-            isSelected: isSelected,
-            isValidMove: isValidMove,
-            onTap: () => pieceSelected(row, col),
-          );
-        },
+                //geçerli bir hareket olup olmadığını kontrol edelim
+                bool isValidMove = false;
+                for (var position in validMoves) {
+                  //örn (2,0) ve (3,0) validMoves içine eklenmiş olsun, position[0]=row position[1]=col oluyor
+                  if (position[0] == row && position[1] == col) {
+                    isValidMove = true;
+                  }
+                }
+
+                return Square(
+                  isWhite: isWhite(index),
+                  piece: board[row][col],
+                  isSelected: isSelected,
+                  isValidMove: isValidMove,
+                  onTap: () => pieceSelected(row, col),
+                );
+              },
+            ),
+          ),
+
+          //alınan siyah taşların alanı
+          Expanded(
+            child: GridView.builder(
+              itemCount: blackPiecesTaken.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+              ),
+              itemBuilder: (context, index) =>
+                  DeadPiece(imagePath: blackPiecesTaken[index].imagePath),
+            ),
+          ),
+        ],
       ),
     );
   }
