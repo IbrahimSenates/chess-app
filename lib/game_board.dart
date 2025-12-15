@@ -30,6 +30,9 @@ class _GameBoardState extends State<GameBoard> {
   //Alınan siyah taşlar
   List<ChessPiece> blackPiecesTaken = [];
 
+  //tur sırası
+  bool isWhiteTurn = true;
+
   @override
   void initState() {
     _initializeBoard();
@@ -151,9 +154,11 @@ class _GameBoardState extends State<GameBoard> {
   void pieceSelected(int row, int col) {
     setState(() {
       if (selectedPiece == null && board[row][col] != null) {
-        selectedPiece = board[row][col];
-        selectedRow = row;
-        selectedCol = col;
+        if (board[row][col]!.isWhite == isWhiteTurn) {
+          selectedPiece = board[row][col];
+          selectedRow = row;
+          selectedCol = col;
+        }
       } else if (board[row][col] != null &&
           board[row][col]!.isWhite == selectedPiece!.isWhite) {
         selectedPiece = board[row][col];
@@ -379,6 +384,7 @@ class _GameBoardState extends State<GameBoard> {
       selectedCol = -1;
       validMoves = [];
     });
+    isWhiteTurn = !isWhiteTurn;
   }
 
   @override
