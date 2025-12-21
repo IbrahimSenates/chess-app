@@ -33,6 +33,10 @@ class _GameBoardState extends State<GameBoard> {
   //tur sırası
   bool isWhiteTurn = true;
 
+  List<int> whiteKingPosition = [7, 4];
+  List<int> blackKingPosition = [0, 4];
+  bool checkStatus = false;
+
   @override
   void initState() {
     _initializeBoard();
@@ -378,6 +382,20 @@ class _GameBoardState extends State<GameBoard> {
     board[newRow][newCol] = selectedPiece;
     board[selectedRow][selectedCol] = null;
 
+    //şah durumunu kontrol et
+    if (isKingInCheck(!isWhiteTurn)) {
+      checkStatus = true;
+    } else {
+      checkStatus = false;
+    }
+    // if (selectedPiece!.type == ChessPieceType.king) {
+    //   if (selectedPiece!.isWhite) {
+    //     whiteKingPosition = [newRow, newCol];
+    //   } else {
+    //     blackKingPosition = [newRow, newCol];
+    //   }
+    // }
+
     setState(() {
       selectedPiece = null;
       selectedRow = -1;
@@ -385,6 +403,35 @@ class _GameBoardState extends State<GameBoard> {
       validMoves = [];
     });
     isWhiteTurn = !isWhiteTurn;
+  }
+
+  bool isKingInCheck(bool isWhiteKing) {
+    //şahın konumunu al
+    List<int> kingPosition = isWhiteKing
+        ? whiteKingPosition
+        : blackKingPosition;
+
+    //düşman taş tehdit ediyor mu?
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        //şahla aynı renktekileri atla
+        if (board[i][j] == null || board[i][j]!.isWhite == isWhiteKing) {
+          continue;
+        }
+
+        List<List<int>> pieceValidMoves = calculateRawValidMoves(
+          i,
+          j,
+          board[i][j],
+        );
+        if (pieceValidMoves.any(
+          (move) => move[0] == kingPosition[0] && move[1] == kingPosition[1],
+        )) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @override
@@ -404,7 +451,7 @@ class _GameBoardState extends State<GameBoard> {
                   DeadPiece(imagePath: whitePiecesTaken[index].imagePath),
             ),
           ),
-
+          Text(checkStatus ? 'ŞAH!!' : ''),
           //Tahta alanı
           Expanded(
             flex: 3,
